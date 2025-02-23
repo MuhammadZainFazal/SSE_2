@@ -3,7 +3,7 @@ import time
 from EnergiBridgeRunner import EnergiBridgeRunner
 
 runner = EnergiBridgeRunner()
-runner.start(results_file="output_test.csv")
+runner.start(results_file="output_test123.csv")
 
 
 # Perform some task
