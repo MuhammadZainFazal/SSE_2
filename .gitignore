@@ -169,3 +169,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+energibridge
+pyenergibridge_config.json
+.idea
+log.txt
+results.csv
