@@ -53,12 +53,14 @@ class EnergiBridgeRunner:
 
     return binary_path
 
-  def start(self, results_file=None, command=["timeout", "10000"]):
+  def start(self, results_file=None, command=["timeout", "1000"]):
+    start_time = time.time()
+    self.logger.info(f"Starting EnergiBridge: {start_time}")
     args = [
-      "-g",  # Flag for summary
-      "--summary",  # Additional flag
+      "-g",
+      "--summary",
+      "--interval", "200",
     ]
-
 
     if results_file:
       self.logger.info(f"Results will be printed to {results_file}")
@@ -69,13 +71,12 @@ class EnergiBridgeRunner:
     try:
       preexec_fn = os.setpgrp if self.is_containerized else None
 
-
       self.process = subprocess.Popen(
         [self.binary_path] + args,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdout=None,
+        stderr=None,
         text=True,
-        shell=False
+        shell=False,
       )
 
       self.logger.info(f"Running EnergiBridge from: {self.binary_path}; started with PID: {self.process.pid}")
@@ -83,6 +84,8 @@ class EnergiBridgeRunner:
       raise RuntimeError(f"Failed to start EnergiBridge: {e}") from e
 
   def stop(self):
+    stop_time = time.time()
+    self.logger.info(f"Starting EnergiBridge: {stop_time}")
     if self.process:
       try:
         if self.is_containerized:

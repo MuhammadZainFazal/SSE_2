@@ -36,11 +36,13 @@ class Scenario:
         self.runner.start(results_file=self.output_file)
         start_time = time.time()
 
-        response = self.llm.invoke(self.messages)
-        end_time = time.time()
+        while time.time() - start_time < 10:
+            response = self.llm.invoke(self.messages)
+            #self.logger.info(f"Response from LLM: {response}")
+            time.sleep(0.2)
+        time.sleep(1)
 
         energy, duration = self.runner.stop()
-        self.logger.info(f"Response from LLM: {response}")
         self.process_results()
 
 
@@ -64,6 +66,7 @@ class Scenario:
 
             # Save back to parquet file
             combined_data.to_parquet(self.dataframe_file, index=False)
+            os.remove(self.output_file)
             self.logger.info(f"Results successfully processed and saved to {self.dataframe_file}")
         except Exception as e:
             self.logger.error(f"Error processing results: {e}")
