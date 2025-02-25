@@ -62,19 +62,21 @@ class Scenario:
 
     def run_llm(self):
         """Run the scenario with an LLM model."""
+
+        time.sleep(5)
         start_time = time.time()
-        while time.time() - start_time < 9:
+        while time.time() - start_time < 35:
             response = self.llm.invoke(self.messages)
             # self.logger.info(f"Response from LLM: {response}")
-            time.sleep(0.1)
-        time.sleep(1)
+            # time.sleep(0.1)
+        time.sleep(20)
         energy, duration = self.runner.stop()
         self.process_results()
 
     def run_sleep(self):
         """Run the scenario without an LLM model."""
-        self.logger.info("No LLM model specified. Sleeping for 10 seconds.")
-        time.sleep(10)
+        self.logger.info("No LLM model specified. Sleeping for 60 seconds.")
+        time.sleep(60)
         energy, duration = self.runner.stop()
         self.process_results()
         return

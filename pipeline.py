@@ -9,7 +9,8 @@ from analysis.analyzer import PowerAnalyzer
 from scenario.runner import Runner
 from scenario.scenario import Scenario
 
-local_models = ["qwen2.5-coder:1.5b-instruct-q5_0", "deepseek-r1:1.5b", "llama3.2:1b"]
+#local_models = ["qwen2.5-coder:1.5b-instruct-q5_0", "deepseek-r1:1.5b", "llama3.2:1b"]
+local_models = ["qwen2.5:0.5b", "qwen2.5:1.5b", "qwen2.5:3b", "qwen2.5:7b"]
 
 # Pull the models if they are not available locally
 for model in local_models:
@@ -27,7 +28,7 @@ for model in local_models:
 idle_scenario = Scenario(name="Sleep", description="Test idle", model=None, prompt=None, runner=energibridge_runner)
 scenarios.append(idle_scenario)
 
-runner = Runner(scenarios, number_of_runs=10)
+runner = Runner(scenarios, number_of_runs=2)
 runner.run()
 
 for scenario in scenarios:

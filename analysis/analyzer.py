@@ -167,7 +167,7 @@ class PowerAnalyzer:
         max_time = min(max_times)  # Use the minimum of the max times to ensure all runs have data
 
         # Create a common time axis with 70 points (we have 10s per run, interval 200ms, so each run should have 50 points but energibridge isn't that accurate)
-        common_times = np.linspace(0, max_time, 70)
+        common_times = np.linspace(0, max_time, 320)
 
         # For each run, interpolate the energy values at these common times
         all_energies = []
@@ -340,7 +340,7 @@ class PowerAnalyzer:
                 max_times.append(run_data['relative_time'].max())
 
             max_time = min(max_times)
-            common_times = np.linspace(0, max_time, 70)
+            common_times = np.linspace(0, max_time, 320)
 
             # For each run, interpolate the energy values at these common times
             all_idle_energies = []
