@@ -92,7 +92,7 @@ class Scenario:
             # Add the run number to all rows in the new data
             new_data['run'] = self.current_run
 
-            self.logger.info(f"New data for run #{self.current_run}: {new_data}")
+            #self.logger.info(f"New data for run #{self.current_run}: {new_data}")
 
             # Load existing data if parquet file exists and combine with new data
             if os.path.exists(self.dataframe_file):

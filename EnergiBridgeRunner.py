@@ -73,8 +73,8 @@ class EnergiBridgeRunner:
 
       self.process = subprocess.Popen(
         [self.binary_path] + args,
-        stdout=None,
-        stderr=None,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
         text=True,
         shell=False,
       )
@@ -85,7 +85,7 @@ class EnergiBridgeRunner:
 
   def stop(self):
     stop_time = time.time()
-    self.logger.info(f"Starting EnergiBridge: {stop_time}")
+    self.logger.info(f"Stopping EnergiBridge: {stop_time}")
     if self.process:
       try:
         if self.is_containerized:
@@ -95,7 +95,7 @@ class EnergiBridgeRunner:
 
         stdout, stderr = self.process.communicate()  # Wait for process to terminate
         self.logger.info("EnergiBridge stopped.")
-        return self._process_stdout(stdout)
+        return None, None
       except Exception as e:
         self.logger.info(f"Failed to stop EnergiBridge: {e}")
         return None, None

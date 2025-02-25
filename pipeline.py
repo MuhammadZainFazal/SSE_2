@@ -27,7 +27,7 @@ for model in local_models:
 idle_scenario = Scenario(name="Sleep", description="Test idle", model=None, prompt=None, runner=energibridge_runner)
 scenarios.append(idle_scenario)
 
-runner = Runner(scenarios, number_of_runs=2)
+runner = Runner(scenarios, number_of_runs=10)
 runner.run()
 
 for scenario in scenarios:
