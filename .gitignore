@@ -174,3 +174,5 @@ pyenergibridge_config.json
 .idea
 log.txt
 results.csv
+energy_analysis_output
+enegibridge_output

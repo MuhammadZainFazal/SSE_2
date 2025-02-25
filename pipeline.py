@@ -5,6 +5,7 @@ import ollama
 from EnergiBridgeRunner import EnergiBridgeRunner
 from langchain_ollama import ChatOllama
 
+from analysis.analyzer import PowerAnalyzer
 from scenario.runner import Runner
 from scenario.scenario import Scenario
 
@@ -21,7 +22,13 @@ energibridge_runner = EnergiBridgeRunner()
 
 scenarios = []
 for model in local_models:
-    scenarios.append(Scenario(name=model, description="Scenario description", model=model, prompt="What is your name?", runner=energibridge_runner))
+    scenarios.append(Scenario(name=model, description=f"Test {model}", model=model, prompt="What is your name?", runner=energibridge_runner))
 
-runner = Runner(scenarios, number_of_runs=5)
+scenarios.append(Scenario(name="Sleep", description="Test idle", model=None, prompt=None, runner=energibridge_runner))
+
+runner = Runner(scenarios, number_of_runs=2)
 runner.run()
+
+for scenario in scenarios:
+    analyzer = PowerAnalyzer(scenario.dataframe_file, scenario.name)
+    analyzer.generate_report()
