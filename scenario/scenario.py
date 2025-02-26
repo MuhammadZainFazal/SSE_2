@@ -1,7 +1,9 @@
 import os
+import subprocess
 import time
 from pathlib import Path
 
+import ollama
 import pandas as pd
 from langchain_ollama import ChatOllama
 
@@ -54,32 +56,65 @@ class Scenario:
     def run(self):
         """Run the scenario and collect results."""
         self.logger.info(f"Running scenario: {self.name} (Run #{self.current_run})")
+        self.start_ollama()
+        time.sleep(5)
+        self.ensure_no_model_running()
+        time.sleep(5)
         self.runner.start(results_file=self.output_file)
-        if self.llm is None:
-            return self.run_sleep()
 
         self.run_llm()
+
+    def ensure_no_model_running(self):
+        models_data = ollama.ps()
+        models = models_data.models
+
+        if not models:
+            self.logger.info("No models running. (That's good!)")
+            return
+        for model in models:
+            self.logger.info(f"Stopping model: {model.model}")
+            subprocess.run(["ollama", "stop", model.model], check=True)
+            time.sleep(2)
+
+        models_data = ollama.ps()
+        models = models_data.models
+        if not models:
+            self.logger.info("No models running. (That's good!)")
+        else:
+            self.logger.error("Failed to stop all models. (There is leftover model running.)")
 
     def run_llm(self):
         """Run the scenario with an LLM model."""
 
         time.sleep(5)
         start_time = time.time()
-        while time.time() - start_time < 35:
-            response = self.llm.invoke(self.messages)
+        while time.time() - start_time < 15:
+            self.llm.invoke(self.messages)
             # self.logger.info(f"Response from LLM: {response}")
             # time.sleep(0.1)
-        time.sleep(20)
+        self.stop_ollama()
+        time.sleep(40)
         energy, duration = self.runner.stop()
         self.process_results()
 
-    def run_sleep(self):
-        """Run the scenario without an LLM model."""
-        self.logger.info("No LLM model specified. Sleeping for 60 seconds.")
-        time.sleep(60)
-        energy, duration = self.runner.stop()
-        self.process_results()
-        return
+    def start_ollama(self):
+        """Starts the Ollama server if it's not already running."""
+        try:
+            self.logger.info("Starting Ollama...")
+            subprocess.run(["ollama", "serve"], check=True)
+            self.logger.info("Ollama started successfully.")
+        except subprocess.CalledProcessError:
+            self.logger.info("Ollama might already be running.")
+
+    def stop_ollama(self):
+        """Stops Ollama without removing the model."""
+        try:
+            self.logger.info("Stopping Ollama...")
+            self.ensure_no_model_running()
+            subprocess.run(["taskkill", "/F", "/IM", "ollama.exe"], check=True)
+            self.logger.info("Ollama stopped successfully.")
+        except subprocess.CalledProcessError:
+            self.logger.error("Failed to stop Ollama.")
 
     def process_results(self):
         """Load results from output_file and append them to dataframe_file."""

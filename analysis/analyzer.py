@@ -8,7 +8,7 @@ from scipy.stats import energy_distance
 
 
 class PowerAnalyzer:
-    def __init__(self, parquet_file, name, idle_parquet_file=None):
+    def __init__(self, parquet_file, name):
         """Initialize the PowerAnalyzer with a parquet file path.
 
         Args:
@@ -16,9 +16,7 @@ class PowerAnalyzer:
         """
         self.parquet_file = parquet_file
         self.name = name
-        self.idle_parquet_file = idle_parquet_file
         self.data = None
-        self.idle_data = None
         self.runs = None
         self.output_dir = "energy_analysis_output"
 
@@ -27,7 +25,6 @@ class PowerAnalyzer:
 
         # Load the data
         self.load_data()
-        self.load_idle_data()
 
     def load_data(self):
         """Load data from the parquet file and perform initial processing."""
@@ -53,36 +50,6 @@ class PowerAnalyzer:
             return True
         except Exception as e:
             print(f"Error loading data: {e}")
-            return False
-        
-    def load_idle_data(self):
-        """Load idle data from the parquet file and perform initial processing."""
-        if (self.idle_parquet_file == self.parquet_file) or (self.idle_parquet_file is None):
-            print("No idle data available for comparison or idle data is the same as the main data.")
-            return
-
-        try:
-            self.idle_data = pd.read_parquet(self.idle_parquet_file)
-            print(f"Sleep data loaded successfully with {len(self.idle_data)} rows")
-
-            if 'run' not in self.idle_data.columns and 'RUN' in self.idle_data.columns:
-                self.idle_data = self.idle_data.rename(columns={'RUN': 'run'})
-
-            idle_runs = self.idle_data['run'].unique()
-            print(f"Found {len(idle_runs)} unique runs in idle data: {idle_runs}")
-
-            if 'Time' in self.idle_data.columns:
-                # Sort data by run and time
-                self.idle_data = self.idle_data.sort_values(['run', 'Time'])
-
-                # Add relative time column (seconds from start of each run)
-                self.idle_data['relative_time'] = self.idle_data.groupby('run')['Time'].transform(
-                    lambda x: (x - x.iloc[0]) / 1000  # Convert to seconds
-                )
-
-            return True
-        except Exception as e:
-            print(f"Error loading idle data: {e}")
             return False
 
     def analyze_energy_by_run(self, data, energy_col='PP0_ENERGY (J)'):
@@ -262,22 +229,10 @@ class PowerAnalyzer:
         return True
 
     def generate_report_without_idle(self):
-        if (self.idle_parquet_file == self.parquet_file) or (self.idle_parquet_file is None):
-            print("No idle data available for comparison or idle data is the same as the main data.")
-            return
-
-        if self.idle_data is None:
-            print("No idle data loaded. Please load idle data first.")
-            return
 
         energy_col = 'PP0_ENERGY (J)'
         if energy_col not in self.data.columns:
             print("No energy data found in the dataset")
-            return
-
-        idle_energy_col = 'PP0_ENERGY (J)'
-        if idle_energy_col not in self.idle_data.columns:
-            print("No energy data found in the idle dataset")
             return
         
         data_without_idle_pp0 = self.generate_data_without_idle()
@@ -310,87 +265,48 @@ class PowerAnalyzer:
         print(f"\nAnalysis complete. Reports and visualizations saved to {self.output_dir}/")
         return True
 
-    def generate_data_without_idle(self, energy_col='PP0_ENERGY (J)'):
+    def generate_data_without_idle(self, energy_col='PP0_ENERGY (J)', idle_seconds=5):
         """
         Generate data with idle energy consumption subtracted.
-        Returns a dataframe with the same structure as self.data but with idle energy subtracted.
-        """
-        if self.idle_data is None:
-            self.load_idle_data()
+        Uses the first n seconds (default 5) of each run as the baseline idle energy
 
-        if self.idle_data is None:
-            print("No idle data available for comparison.")
-            return self.data.copy()
+        Args:
+            energy_col: The column containing energy measurements
+            idle_seconds: Number of seconds at the beginning of each run to use as idle baseline
 
-        if energy_col not in self.data.columns or energy_col not in self.idle_data.columns:
-            print("Energy column missing in main or idle dataset.")
+        Returns:
+        A dataframe with the same structure as self.data but with idle energy subtracted.
+    """
+        if energy_col not in self.data.columns:
+            print(f"Energy column '{energy_col}' missing in dataset.")
             return self.data.copy()
 
         # Create a copy of the original data
         adjusted_data = self.data.copy()
 
-        # Calculate average idle energy at each timestamp across all idle runs
-        # Group by relative_time and calculate mean energy
-        if 'relative_time' in self.idle_data.columns:
-            # We need to create a common time axis for averaging
-            # First, find the min and max relative time across all runs
-            max_times = []
-            for run in self.idle_data['run'].unique():
-                run_data = self.idle_data[self.idle_data['run'] == run]
-                max_times.append(run_data['relative_time'].max())
+        # For each run, calculate and subtract the idle energy
+        for run in self.runs:
+            # Create a mask for the current run
+            run_mask = adjusted_data['run'] == run
+            run_data = adjusted_data[run_mask]
 
-            max_time = min(max_times)
-            common_times = np.linspace(0, max_time, 320)
+            # Only process runs that have data
+            if len(run_data) > 0:
+                # Get data from the first idle_seconds seconds of the run
+                idle_data = run_data[run_data['relative_time'] <= idle_seconds]
 
-            # For each run, interpolate the energy values at these common times
-            all_idle_energies = []
+                if len(idle_data) > 0:
+                    # Calculate the mean energy during the idle period
+                    mean_idle_energy = idle_data[energy_col].mean()
 
-            for run in self.idle_data['run'].unique():
-                run_data = self.idle_data[self.idle_data['run'] == run]
-
-                # Only use data up to the common max time
-                run_data = run_data[run_data['relative_time'] <= max_time]
-
-                # Interpolate energy values at the common time points
-                interpolated_energy = np.interp(
-                    common_times,
-                    run_data['relative_time'],
-                    run_data[energy_col]
-                )
-
-                all_idle_energies.append(interpolated_energy)
-
-            all_idle_energies_array = np.array(all_idle_energies)
-            mean_idle_energy = np.mean(all_idle_energies_array, axis=0)
-
-            # For each run in the actual data, subtract the interpolated idle energy
-            for run in self.runs:
-                run_data = adjusted_data[adjusted_data['run'] == run]
-
-                # Create a mask for the current run
-                run_mask = adjusted_data['run'] == run
-
-                # Only process runs that have data
-                if len(run_data) > 0:
-                    # Interpolate the idle energy values to match the timestamps in this run
-                    interpolated_idle_energy = np.interp(
-                        run_data['relative_time'],
-                        common_times,
-                        mean_idle_energy,
-                        left=mean_idle_energy[0],
-                        right=mean_idle_energy[-1]
-                    )
-
-                    # Subtract the interpolated idle energy from the actual energy
-                    adjusted_data.loc[run_mask, energy_col] = run_data[energy_col] - interpolated_idle_energy
+                    # Subtract this constant baseline from all measurements in the run
+                    adjusted_data.loc[run_mask, energy_col] = run_data[energy_col] - mean_idle_energy
 
                     # Ensure no negative values (can happen if idle > active in some cases)
                     adjusted_data.loc[run_mask & (adjusted_data[energy_col] < 0), energy_col] = 0
-        else:
-            print("No relative_time column in idle data. Cannot subtract idle energy.")
-            return self.data.copy()
+                else:
+                    print(f"Warning: Run {run} has no data within the first {idle_seconds} seconds.")
 
-        print(f"Generated data with idle energy subtracted.")
+        print(f"Generated data with idle energy subtracted using mean energy from first {idle_seconds} seconds as baseline.")
         return adjusted_data
 
-    

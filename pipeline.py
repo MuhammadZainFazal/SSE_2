@@ -25,12 +25,9 @@ scenarios = []
 for model in local_models:
     scenarios.append(Scenario(name=model, description=f"Test {model}", model=model, prompt="What is your name?", runner=energibridge_runner))
 
-idle_scenario = Scenario(name="Sleep", description="Test idle", model=None, prompt=None, runner=energibridge_runner)
-scenarios.append(idle_scenario)
-
-runner = Runner(scenarios, number_of_runs=2)
+runner = Runner(scenarios, number_of_runs=30)
 runner.run()
 
 for scenario in scenarios:
-    analyzer = PowerAnalyzer(scenario.dataframe_file, scenario.name, idle_scenario.dataframe_file)
+    analyzer = PowerAnalyzer(scenario.dataframe_file, scenario.name)
     analyzer.generate_report()

@@ -13,7 +13,7 @@ class Runner:
         self.initialize_random_order()
         for scenario in self.run_order:
             scenario.run()
-            sleep(60)
+            sleep(180)
 
     def initialize_random_order(self):
         """Initialize a random order of scenarios to run 30 times each."""
