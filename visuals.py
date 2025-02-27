@@ -23,8 +23,8 @@ for file in parquet_files:
 
 df = pd.concat(all_data, ignore_index=True)
 
-# Convert Time column to datetime if needed
-df['Time'] = pd.to_datetime(df['Time'], unit='ns')
+# Calculate time since start in seconds
+df['Time'] = (df['Time'] - df['Time'].min() * 1e3) / 1e9
 
 # Calculate additional metrics
 df['CPU_USAGE_MEAN'] = df[[col for col in df.columns if 'CPU_USAGE' in col]].mean(axis=1)
@@ -32,13 +32,13 @@ df['CPU_FREQUENCY_MEAN'] = df[[col for col in df.columns if 'CPU_FREQUENCY' in c
 df['GPU_MEMORY_UTILIZATION'] = (df['GPU0_MEMORY_USED'] / df['GPU0_MEMORY_TOTAL']) * 100
 
 # Calculate Energy Delay Product (EDP)
-df['EDP'] = df['PACKAGE_ENERGY (J)'] * df['Time'].diff().dt.total_seconds().fillna(0)
+df['EDP'] = df['PACKAGE_ENERGY (J)'] * df['Time'].diff().fillna(0)
 
 # Visualizing CPU usage over time per model
 plt.figure(figsize=(10, 6))
 sns.lineplot(x='Time', y='CPU_USAGE_MEAN', hue='model', data=df)
 plt.title('Average CPU Usage Over Time by Model')
-plt.xlabel('Time')
+plt.xlabel('Time (ms)')
 plt.ylabel('CPU Usage (%)')
 plt.xticks(rotation=45)
 plt.legend(title='Model')
@@ -50,7 +50,7 @@ plt.figure(figsize=(10, 6))
 sns.lineplot(x='Time', y='DRAM_ENERGY (J)', hue='model', data=df, legend='full')
 sns.lineplot(x='Time', y='PACKAGE_ENERGY (J)', hue='model', data=df, legend='full')
 plt.title('Energy Consumption Over Time by Model')
-plt.xlabel('Time')
+plt.xlabel('Time (ms)')
 plt.ylabel('Energy (J)')
 plt.legend(title='Model')
 plt.xticks(rotation=45)
@@ -61,7 +61,7 @@ plt.close()
 plt.figure(figsize=(10, 6))
 sns.lineplot(x='Time', y='EDP', hue='model', data=df)
 plt.title('Energy Delay Product Over Time by Model')
-plt.xlabel('Time')
+plt.xlabel('Time (ms)')
 plt.ylabel('EDP (J·s)')
 plt.xticks(rotation=45)
 plt.legend(title='Model')
