@@ -15,7 +15,7 @@ if not parquet_files:
     raise FileNotFoundError("No parquet files found in 'energibridge_output' folder")
 
 for file in parquet_files:
-    model_name = os.path.splitext(file)[0]
+    model_name = (os.path.splitext(file)[0]).rstrip('_dataframe')
     file_path = os.path.join(parquet_dir, file)
     df = pd.read_parquet(file_path)
     df['model'] = model_name
