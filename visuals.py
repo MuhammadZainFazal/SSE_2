@@ -24,7 +24,7 @@ for file in parquet_files:
 df = pd.concat(all_data, ignore_index=True)
 
 # Calculate time since start in seconds
-df['Time'] = (df['Time'] - df['Time'].min() * 1e3) / 1e9
+df['Time'] = (df['Time'] - df['Time'].min()) / 1e6
 
 # Calculate additional metrics
 df['CPU_USAGE_MEAN'] = df[[col for col in df.columns if 'CPU_USAGE' in col]].mean(axis=1)
