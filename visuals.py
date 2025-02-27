@@ -68,6 +68,16 @@ plt.legend(title='Model')
 plt.savefig('images/EDP_Over_Time_by_Model.png')
 plt.close()
 
+# Visualizing EDP distribution by model using violin plots
+plt.figure(figsize=(12, 12))
+sns.violinplot(x='model', y='EDP', data=df, inner='quartile', scale='width')
+plt.title('Energy Delay Product Distribution by Model')
+plt.xlabel('Model')
+plt.ylabel('EDP (J·s)')
+plt.xticks(rotation=45)
+plt.savefig('images/EDP_Distribution_by_Model.png')
+plt.close()
+
 # Summary statistics by model
 summary_stats = df.groupby('model').describe()
 print(summary_stats)
