@@ -21,7 +21,7 @@ if not logger.hasHandlers():
 
 class Scenario:
     def __init__(self, name, description, model, prompt, runner, temperature=0, num_ctx=16384):
-        self.output_dir = "enegibridge_output"
+        self.output_dir = "energibridge_output"
         Path(self.output_dir).mkdir(exist_ok=True)
         self.name = name
         self.description = description

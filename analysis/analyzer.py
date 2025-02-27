@@ -52,6 +52,44 @@ class PowerAnalyzer:
             print(f"Error loading data: {e}")
             return False
 
+    def sanitize_short_runs(self, min_duration=40):
+        """Remove runs that last less than the specified duration in seconds.
+
+        Args:
+            min_duration (float): Minimum duration in seconds a run must last to be kept
+
+        Returns:
+            int: Number of runs removed
+        """
+        if self.data is None or 'relative_time' not in self.data.columns:
+            print("No data loaded or no time information available.")
+            return 0
+
+        # Calculate the duration of each run
+        run_durations = self.data.groupby('run')['relative_time'].max()
+        print(f"Run durations (seconds):\n{run_durations}")
+
+        # Identify runs shorter than the minimum duration
+        short_runs = run_durations[run_durations < min_duration].index.tolist()
+
+        if short_runs:
+            # Save the original number of runs for reporting
+            original_run_count = len(self.runs)
+
+            # Filter out the short runs from the data
+            self.data = self.data[~self.data['run'].isin(short_runs)]
+
+            # Update the list of runs
+            self.runs = self.data['run'].unique()
+
+            print(f"Removed {len(short_runs)} runs that were shorter than {min_duration} seconds: {short_runs}")
+            print(f"Remaining runs: {self.runs}")
+
+            return len(short_runs)
+        else:
+            print(f"No runs found shorter than {min_duration} seconds.")
+            return 0
+
     def analyze_energy_by_run(self, data, energy_col='PP0_ENERGY (J)'):
         """Analyze energy usage grouped by run."""
         if data is None:
@@ -198,6 +236,8 @@ class PowerAnalyzer:
 
     def generate_report(self):
         """Generate a comprehensive analysis report."""
+
+        self.sanitize_short_runs(min_duration=40)
         print("Generating comprehensive energy and CPU usage analysis report...")
 
         energy_stats = self.analyze_energy_by_run(self.data)
