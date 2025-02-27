@@ -26,13 +26,15 @@ df = pd.concat(all_data, ignore_index=True)
 # Calculate time since start in seconds
 df['Time'] = (df['Time'] - df['Time'].min()) / 1e6
 
+print(df.columns)
+
 # Calculate additional metrics
 df['CPU_USAGE_MEAN'] = df[[col for col in df.columns if 'CPU_USAGE' in col]].mean(axis=1)
 df['CPU_FREQUENCY_MEAN'] = df[[col for col in df.columns if 'CPU_FREQUENCY' in col]].mean(axis=1)
 df['GPU_MEMORY_UTILIZATION'] = (df['GPU0_MEMORY_USED'] / df['GPU0_MEMORY_TOTAL']) * 100
 
 # Calculate Energy Delay Product (EDP)
-df['EDP'] = df['PACKAGE_ENERGY (J)'] * df['Time'].diff().fillna(0)
+df['EDP'] = df['PACKAGE_ENERGY (J)'] * df['Time']
 
 # Visualizing CPU usage over time per model
 plt.figure(figsize=(10, 6))
