@@ -46,6 +46,16 @@ plt.legend(title='Model')
 plt.savefig('images/CPU_Usage_Over_Time_by_Model.png')
 plt.close()
 
+# Visualizing CPU usage over time per model
+plt.figure(figsize=(10, 6))
+sns.lineplot(x='Time', y='PP0_ENERGY (J)', hue='model', data=df)
+plt.title('PP0 Energy Over Time by Model')
+plt.xlabel('Time (ms)')
+plt.ylabel('PP0 Energy (J)')
+plt.legend(title='Model')
+plt.savefig('images/PP0_Energy_Over_Time_by_Model.png')
+plt.close()
+
 # Visualizing energy consumption over time per model
 plt.figure(figsize=(10, 6))
 sns.lineplot(x='Time', y='DRAM_ENERGY (J)', hue='model', data=df, legend='full')
