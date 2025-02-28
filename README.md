@@ -11,5 +11,6 @@ To run the project:
 ```
 4. Configure path to energibridge.exe in `pyenergibridge_config.json` in the root directory on this project
 5. Install Ollama
-6. Run Ollama, LibreHardwareMonitor/OpenHardwareMonitor (with admin access), and run `python pipeline.py` 
+6. Run Ollama, LibreHardwareMonitor/OpenHardwareMonitor or RAPL service, and run `python pipeline.py`
 from terminal with admin permissions
+7. To create more visuals you can run visuals.py
