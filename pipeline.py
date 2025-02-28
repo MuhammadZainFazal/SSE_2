@@ -9,8 +9,8 @@ from analysis.analyzer import PowerAnalyzer
 from scenario.runner import Runner
 from scenario.scenario import Scenario
 
-#local_models = ["qwen2.5-coder:1.5b-instruct-q5_0", "deepseek-r1:1.5b", "llama3.2:1b"]
-local_models = ["qwen2.5:0.5b", "qwen2.5:1.5b", "qwen2.5:3b", "qwen2.5:7b"]
+local_models = ["qwen2.5-coder:1.5b-instruct-q5_0", "yi-coder:1.5b", "deepseek-r1:1.5b"]
+# local_models = ["qwen2.5:0.5b", "qwen2.5:1.5b", "qwen2.5:3b", "qwen2.5:7b"]
 
 # Pull the models if they are not available locally
 for model in local_models:
