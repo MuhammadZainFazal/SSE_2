@@ -17,5 +17,6 @@ To run the project:
     }
 ```
 6. Install [Ollama](https://ollama.com/download).
-7. Run Ollama and LibreHardwareMonitor/OpenHardwareMonitor (with admin access).
+7. Run Ollama and LibreHardwareMonitor/OpenHardwareMonitor or RAPL service (with admin access).
 8. Run `python pipeline.py` from terminal with admin permissions.
+9. To create more visuals you can run visuals.py
