@@ -1,33 +1,36 @@
 import time
-
-import ollama
+import os
 
 from EnergiBridgeRunner import EnergiBridgeRunner
-from langchain_ollama import ChatOllama
 
-from analysis.analyzer import PowerAnalyzer
+# from analysis.analyzer import PowerAnalyzer
 from scenario.runner import Runner
 from scenario.scenario import Scenario
 
-local_models = ["qwen2.5-coder:1.5b-instruct-q5_0", "yi-coder:1.5b", "deepseek-r1:1.5b"]
-# local_models = ["qwen2.5:0.5b", "qwen2.5:1.5b", "qwen2.5:3b", "qwen2.5:7b"]
+# Directories for Java files and rulesets
+project_dir = os.path.dirname(os.path.abspath(__file__))
+java_files_directory = [os.path.join(project_dir, 'java_files', f) for f in os.listdir(os.path.join(project_dir, 'java_files')) if f.endswith('.java')]
+#ruleset_paths = [os.path.join(project_dir, 'rulesets', f) for f in os.listdir(os.path.join(project_dir, 'rulesets')) if f.endswith('.xml')]
+ruleset_paths = [os.path.join(project_dir, 'rulesets\\rulesets\\java\\quickstart.xml', )]
 
-# Pull the models if they are not available locally
-for model in local_models:
-    available_models = set(map(lambda x: x.model, ollama.list().models))
-    if model not in available_models:
-        print("Pulling model", model)
-        ollama.pull(model)
 
 energibridge_runner = EnergiBridgeRunner()
 
-scenarios = []
-for model in local_models:
-    scenarios.append(Scenario(name=model, description=f"Test {model}", model=model, prompt="What is your name?", runner=energibridge_runner))
+scenarios = [
+    Scenario(
+        name=os.path.basename(file),
+        description=f"Test {os.path.basename(file)}",
+        src_dir=os.path.dirname(file),
+        ruleset_path=rule,
+        runner=energibridge_runner
+    )
+    for file in java_files_directory
+    for rule in ruleset_paths
+]
 
-runner = Runner(scenarios, number_of_runs=30)
+runner = Runner(scenarios, number_of_runs=2)
 runner.run()
 
-for scenario in scenarios:
-    analyzer = PowerAnalyzer(scenario.dataframe_file, scenario.name)
-    analyzer.generate_report()
+# for scenario in scenarios:
+#     analyzer = PowerAnalyzer(scenario.dataframe_file, scenario.name)
+#     analyzer.generate_report()
