@@ -55,41 +55,33 @@ class Scenario:
         self.logger.info(f"Running scenario: {self.name} (Run #{self.current_run})")
 
         self.runner.start(results_file=self.output_file)
-
+        time.sleep(5)
         self.run_pmd()
 
-    def ensure_no_model_running(self):
-        models_data = ollama.ps()
-        models = models_data.models
-
-        if not models:
-            self.logger.info("No models running. (That's good!)")
-            return
-        for model in models:
-            self.logger.info(f"Stopping model: {model.model}")
-            subprocess.run(["ollama", "stop", model.model], check=True)
-            time.sleep(2)
-
-        models_data = ollama.ps()
-        models = models_data.models
-        if not models:
-            self.logger.info("No models running. (That's good!)")
-        else:
-            self.logger.error("Failed to stop all models. (There is leftover model running.)")
-
     def run_pmd(self):
-        """Run the scenario with PMD."""
+        """Run the scenario with PMD, ensuring it runs for at least 10 seconds."""
 
-        # Run PMD via CLI
+        # Start PMD
         self.logger.info("Running PMD...")
         pmd_command = [
-            "pmd", "check", 
-            "-d", self.src_dir,  
-            "-R", self.ruleset_path, 
+            "pmd", "check",
+            "-d", self.src_dir,
+            "-R", self.ruleset_path,
             "-f", "text", "--no-fail-on-violation"
         ]
         self.logger.info(f"Running PMD command: {' '.join(pmd_command)}")
-        subprocess.run(pmd_command, check=True, shell=True)
+
+        start_time = time.time()
+
+        process = subprocess.run(pmd_command, check=True, shell=True)
+
+        elapsed_time = time.time() - start_time
+        remaining_time = max(0, 10 - elapsed_time)
+
+        if remaining_time > 0:
+            self.logger.info(f"PMD finished early. Sleeping for {remaining_time:.2f} seconds...")
+            time.sleep(remaining_time)
+
         energy, duration = self.runner.stop()
         self.process_results()
 

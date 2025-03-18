@@ -237,7 +237,7 @@ class PowerAnalyzer:
     def generate_report(self):
         """Generate a comprehensive analysis report."""
 
-        self.sanitize_short_runs(min_duration=40)
+        self.sanitize_short_runs(min_duration=5)
         print("Generating comprehensive energy and CPU usage analysis report...")
 
         energy_stats = self.analyze_energy_by_run(self.data)

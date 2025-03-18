@@ -3,7 +3,7 @@ import os
 
 from EnergiBridgeRunner import EnergiBridgeRunner
 
-# from analysis.analyzer import PowerAnalyzer
+from analysis.analyzer import PowerAnalyzer
 from scenario.runner import Runner
 from scenario.scenario import Scenario
 
@@ -15,7 +15,7 @@ ruleset_paths = [os.path.join(project_dir, 'rulesets\\rulesets\\java\\quickstart
 
 
 energibridge_runner = EnergiBridgeRunner()
-
+print(java_files_directory)
 scenarios = [
     Scenario(
         name=os.path.basename(file),
@@ -28,9 +28,9 @@ scenarios = [
     for rule in ruleset_paths
 ]
 
-runner = Runner(scenarios, number_of_runs=2)
+runner = Runner(scenarios, number_of_runs=6)
 runner.run()
 
-# for scenario in scenarios:
-#     analyzer = PowerAnalyzer(scenario.dataframe_file, scenario.name)
-#     analyzer.generate_report()
+for scenario in scenarios:
+    analyzer = PowerAnalyzer(scenario.dataframe_file, scenario.name)
+    analyzer.generate_report()
