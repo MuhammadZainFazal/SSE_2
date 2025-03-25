@@ -67,7 +67,7 @@ class Scenario:
             "pmd", "check",
             "-d", self.src_dir,
             "-R", self.ruleset_path,
-            "-f", "text", "--no-fail-on-violation"
+            "-f", "text", "--no-fail-on-violation", "--no-fail-on-error"
         ]
         self.logger.info(f"Running PMD command: {' '.join(pmd_command)}")
 

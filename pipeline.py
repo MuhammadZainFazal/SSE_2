@@ -9,7 +9,7 @@ from scenario.scenario import Scenario
 
 # Directories for Java files and rulesets
 project_dir = os.path.dirname(os.path.abspath(__file__))
-java_files_directory = [os.path.join(project_dir, 'java_files', f) for f in os.listdir(os.path.join(project_dir, 'java_files')) if f.endswith('.java')]
+java_files_directory = [os.path.join(project_dir, 'java_files', 'junit5-r5.12.1')]
 #ruleset_paths = [os.path.join(project_dir, 'rulesets', f) for f in os.listdir(os.path.join(project_dir, 'rulesets')) if f.endswith('.xml')]
 ruleset_paths = [os.path.join(project_dir, 'rulesets\\rulesets\\java\\quickstart.xml', )]
 
