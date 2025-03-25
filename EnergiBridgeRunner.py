@@ -95,7 +95,7 @@ class EnergiBridgeRunner:
 
         stdout, stderr = self.process.communicate()  # Wait for process to terminate
         self.logger.info("EnergiBridge stopped.")
-        return None, None
+        return self._process_stdout(stdout)
       except Exception as e:
         self.logger.info(f"Failed to stop EnergiBridge: {e}")
         return None, None

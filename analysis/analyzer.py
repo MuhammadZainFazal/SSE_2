@@ -261,6 +261,8 @@ class PowerAnalyzer:
 
         self.plot_energy_by_run(self.data, 'energy_by_run_pp1', save=True, energy_col='PP1_ENERGY (J)')
         self.plot_average_energy_with_error(self.data, 'average_energy_with_error_pp1', save=True, energy_col='PP1_ENERGY (J)')
+        self.calculate_total_energy_consumption(self.data, energy_col='PP0_ENERGY (J)')
+        self.calculate_total_energy_consumption(self.data, energy_col='PP1_ENERGY (J)')
 
         print(f"\nAnalysis complete. Reports and visualizations saved to {self.output_dir}/")
 
@@ -301,6 +303,9 @@ class PowerAnalyzer:
 
         self.plot_energy_by_run(data_without_idle_pp1, 'energy_by_run_without_idle_pp1', save=True, energy_col='PP1_ENERGY (J)')
         self.plot_average_energy_with_error(data_without_idle_pp1, 'average_energy_with_error_without_idle_pp1', save=True, energy_col='PP1_ENERGY (J)')
+
+        self.calculate_total_energy_consumption(data_without_idle_pp0, energy_col='PP0_ENERGY (J)', filename_suffix='_without_idle')
+        self.calculate_total_energy_consumption(data_without_idle_pp1, energy_col='PP1_ENERGY (J)', filename_suffix='_without_idle')
 
         print(f"\nAnalysis complete. Reports and visualizations saved to {self.output_dir}/")
         return True
@@ -349,4 +354,32 @@ class PowerAnalyzer:
 
         print(f"Generated data with idle energy subtracted using mean energy from first {idle_seconds} seconds as baseline.")
         return adjusted_data
+
+    def calculate_total_energy_consumption(self, data, energy_col='PP0_ENERGY (J)', filename_suffix=''):
+        """
+        Calculate total energy consumption for each run.
+
+        Args:
+            energy_col (str, optional): Column name for energy measurements.
+                                        Defaults to 'PP0_ENERGY (J)'.
+
+        Returns:
+            pandas.Series: Total energy consumption for each run
+        """
+        if energy_col not in data.columns:
+            print(f"Energy column '{energy_col}' not found in dataset.")
+            return None
+
+        # Group by run and sum the energy consumption
+        total_energy = data.groupby('run')[energy_col].sum()
+
+        print(f"Total Energy Consumption ({energy_col}):")
+        print(total_energy)
+
+        output_file = os.path.join(self.output_dir,
+                                   f"{self.name.replace(':', '_')}_total_energy_{energy_col.replace(' ', '_')}{filename_suffix}.csv")
+        total_energy.to_csv(output_file)
+        print(f"Total energy consumption saved to {output_file}")
+
+        return total_energy
 

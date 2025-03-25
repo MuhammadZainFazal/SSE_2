@@ -71,18 +71,10 @@ class Scenario:
         ]
         self.logger.info(f"Running PMD command: {' '.join(pmd_command)}")
 
-        start_time = time.time()
-
         process = subprocess.run(pmd_command, check=True, shell=True)
 
-        elapsed_time = time.time() - start_time
-        remaining_time = max(0, 10 - elapsed_time)
-
-        if remaining_time > 0:
-            self.logger.info(f"PMD finished early. Sleeping for {remaining_time:.2f} seconds...")
-            time.sleep(remaining_time)
-
         energy, duration = self.runner.stop()
+        self.logger.info(f"Energy consumption: {energy} J, Duration: {duration} s")
         self.process_results()
 
     def process_results(self):
