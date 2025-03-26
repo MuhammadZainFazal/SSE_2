@@ -16,7 +16,8 @@ To run the project:
         "binary_path": "<your_absolute_path_to_energibridge.exe>"
     }
 ```
-6. Install [Ollama](https://ollama.com/download).
-7. Run Ollama and LibreHardwareMonitor/OpenHardwareMonitor or RAPL service (with admin access).
-8. Run `python pipeline.py` from terminal with admin permissions.
-9. To create more visuals you can run visuals.py
+6. Run LibreHardwareMonitor/OpenHardwareMonitor or RAPL service (with admin access).
+7. Download pmd, unzip it and add its path to the system variables
+8. Download the following open source projects : JUnit 5 - https://github.com/junit-team/junit5/archive/refs/tags/r5.12.1.zip, spring-framework - https://github.com/spring-projects/spring-framework/archive/refs/heads/main.zip, JabRef - https://github.com/JabRef/jabref/archive/refs/heads/main.zip, Terasology - https://github.com/MovingBlocks/Terasology/archive/refs/heads/develop.zip and unzip them inside the java-files folder.
+9. Run `python pipeline.py` from terminal with admin permissions.
+10. To create more visuals you can run visuals.py
