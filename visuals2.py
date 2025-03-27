@@ -49,34 +49,33 @@ df_non_idle = df_all[df_all["Idle Status"] == "without_idle"]
 
 # # Aggregate average energy consumption per project
 # project_energy = df_all.groupby("Project").mean().reset_index()
-project_energy_idle = df_idle.groupby("Project")[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]].mean().reset_index()
-project_energy_idle[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]] = project_energy_idle[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]].applymap(convert_to_mj)
+project_energy_idle = df_idle.groupby("Project")[["PP0_ENERGY (J)"]].mean().reset_index()
+project_energy_idle[["PP0_ENERGY (J)"]] = project_energy_idle[["PP0_ENERGY (J)"]].applymap(convert_to_mj)
 print(project_energy_idle)
 
-project_energy_non_idle = df_non_idle.groupby("Project")[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]].mean().reset_index()
-project_energy_non_idle[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]] = project_energy_non_idle[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]]
+project_energy_non_idle = df_non_idle.groupby("Project")[["PP0_ENERGY (J)"]].mean().reset_index()
+project_energy_non_idle[["PP0_ENERGY (J)"]] = project_energy_non_idle[["PP0_ENERGY (J)"]]
 print(project_energy_non_idle)
 
 # # Aggregate average energy per ruleset
 # ruleset_energy = df_all.groupby("Ruleset").mean().reset_index()
-ruleset_energy_idle = df_idle.groupby("Ruleset")[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]].mean().reset_index()
-ruleset_energy_idle[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]] = ruleset_energy_idle[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]].applymap(convert_to_mj)
+ruleset_energy_idle = df_idle.groupby("Ruleset")[["PP0_ENERGY (J)"]].mean().reset_index()
+ruleset_energy_idle[["PP0_ENERGY (J)"]] = ruleset_energy_idle[["PP0_ENERGY (J)"]].applymap(convert_to_mj)
 print(ruleset_energy_idle)
 
-ruleset_energy_non_idle = df_non_idle.groupby("Ruleset")[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]].mean().reset_index()
-ruleset_energy_non_idle[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]] = ruleset_energy_non_idle[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]]
+ruleset_energy_non_idle = df_non_idle.groupby("Ruleset")[["PP0_ENERGY (J)"]].mean().reset_index()
+ruleset_energy_non_idle[["PP0_ENERGY (J)"]] = ruleset_energy_non_idle[["PP0_ENERGY (J)"]]
 print(ruleset_energy_non_idle)
 
 
 # 1. Energy consumption by project (PP0 and PP1)
 plt.figure(figsize=(10, 6))
 project_energy_idle_melted = project_energy_idle.melt(id_vars=["Project"], var_name="Energy Type", value_name="Energy (MJ)")
-sns.barplot(data=project_energy_idle_melted, x="Project", y="Energy (MJ)", hue="Energy Type")
+sns.barplot(data=project_energy_idle_melted, x="Project", y="Energy (MJ)", width=0.4)
 # plt.xticks(rotation=45)
-plt.title("Average Energy Consumption per Project (PP0 vs PP1) Idle")
+plt.title("Average Energy Consumption per Project (PP0) Idle")
 plt.ylabel("Energy (MJ)")
 plt.xlabel("Project")
-plt.legend(title="Energy Type")
 max_value = project_energy_idle_melted["Energy (MJ)"].max()
 padding = max_value * 0.1  # Add 10% padding
 plt.ylim(0, max_value + padding)
@@ -86,12 +85,11 @@ plt.close()
 # 2. Energy consumption by project (PP0 and PP1) Non Idle
 plt.figure(figsize=(10, 6))
 project_energy_non_idle_melted = project_energy_non_idle.melt(id_vars=["Project"], var_name="Energy Type", value_name="Energy (J)")
-sns.barplot(data=project_energy_non_idle_melted, x="Project", y="Energy (J)", hue="Energy Type")
+sns.barplot(data=project_energy_non_idle_melted, x="Project", y="Energy (J)",  width=0.4)
 # plt.xticks(rotation=45)
-plt.title("Average Energy Consumption per Project (PP0 vs PP1) Non Idle")
+plt.title("Average Energy Consumption per Project (PP0) Non Idle")
 plt.ylabel("Energy (J)")
 plt.xlabel("Project")
-plt.legend(title="Energy Type")
 max_value = project_energy_non_idle_melted["Energy (J)"].max()
 padding = max_value * 0.1  # Add 10% padding
 plt.ylim(0, max_value + padding)
@@ -102,13 +100,12 @@ plt.close()
 plt.figure(figsize=(10, 5))
 ruleset_energy_idle_melted = ruleset_energy_idle.melt(id_vars=["Ruleset"], var_name="Energy Type", value_name="Energy (MJ)")
 max_value = ruleset_energy_idle_melted["Energy (MJ)"].max()
-sns.barplot(data=ruleset_energy_idle_melted, x="Ruleset", y="Energy (MJ)", hue="Energy Type")
-plt.title("Average Energy Consumption per Ruleset (PP0 vs PP1) Idle")
+sns.barplot(data=ruleset_energy_idle_melted, x="Ruleset", y="Energy (MJ)", width=0.5)
+plt.title("Average Energy Consumption per Ruleset (PP0) Idle")
 plt.ylabel("Energy (MJ)")
 plt.xlabel("Ruleset")
 padding = max_value * 0.1  # Add 10% padding
 plt.ylim(0, max_value + padding)  # Set y-axis limits
-plt.legend(title="Energy Type")
 plt.savefig('images/Energy_Consumption_By_Ruleset_Idle.png')
 plt.close()
 
@@ -116,13 +113,12 @@ plt.close()
 plt.figure(figsize=(10, 5))
 ruleset_energy_non_idle_melted = ruleset_energy_non_idle.melt(id_vars=["Ruleset"], var_name="Energy Type", value_name="Energy (J)")
 max_value = ruleset_energy_non_idle_melted["Energy (J)"].max()
-sns.barplot(data=ruleset_energy_non_idle_melted, x="Ruleset", y="Energy (J)", hue="Energy Type")
-plt.title("Average Energy Consumption per Ruleset (PP0 vs PP1) Non Idle")
+sns.barplot(data=ruleset_energy_non_idle_melted, x="Ruleset", y="Energy (J)", width=0.5)
+plt.title("Average Energy Consumption per Ruleset (PP0) Non Idle")
 plt.ylabel("Energy (J)")
 plt.xlabel("Ruleset")
 padding = max_value * 0.1  # Add 10% padding
 plt.ylim(0, max_value + padding)  # Set y-axis limits
-plt.legend(title="Energy Type")
 plt.savefig('images/Energy_Consumption_By_Ruleset_Non_Idle.png')
 plt.close()
 
