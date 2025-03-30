@@ -3,6 +3,7 @@ import re
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
 
 def convert_to_mj(value):
     return value / 1e6
@@ -27,7 +28,6 @@ for file in os.listdir(directory):
             df = pd.read_csv(os.path.join(directory, file))
             df["Project"] = project
             df["Ruleset"] = ruleset
-            df["Energy Type"] = energy_type
             df["Idle Status"] = idle_status
             data.append(df)
 
@@ -40,55 +40,56 @@ df_idle = df_all[df_all["Idle Status"] == "with_idle"]
 df_non_idle = df_all[df_all["Idle Status"] == "without_idle"]
 
 # Aggregate mean and std for Projects
-project_energy_idle = df_idle.groupby("Project")["PP0_ENERGY (J)"].agg(["mean", "std"]).reset_index()
-project_energy_idle.columns = ["Project", "Energy Mean (MJ)", "Energy Std (MJ)"]
-project_energy_idle[["Energy Mean (MJ)", "Energy Std (MJ)"]] = project_energy_idle[["Energy Mean (MJ)", "Energy Std (MJ)"]].applymap(convert_to_mj)
+def compute_aggregates(df):
+    agg_df = df.groupby("Project")[["PP0_ENERGY (J)", "PP1_ENERGY (J)"]].agg(["mean", "std"]).reset_index()
+    agg_df.columns = ["Project", "PP0 Mean (J)", "PP0 Std (J)", "PP1 Mean (J)", "PP1 Std (J)"]
 
-project_energy_non_idle = df_non_idle.groupby("Project")["PP0_ENERGY (J)"].agg(["mean", "std"]).reset_index()
-project_energy_non_idle.columns = ["Project", "Energy Mean (J)", "Energy Std (J)"]
+    # Filter out negative values
+    agg_df = agg_df[(agg_df["PP0 Mean (J)"] > 0) & (agg_df["PP1 Mean (J)"] > 0)]
 
-# Aggregate mean and std for Rulesets
-ruleset_energy_idle = df_idle.groupby("Ruleset")["PP0_ENERGY (J)"].agg(["mean", "std"]).reset_index()
-ruleset_energy_idle.columns = ["Ruleset", "Energy Mean (MJ)", "Energy Std (MJ)"]
-ruleset_energy_idle[["Energy Mean (MJ)", "Energy Std (MJ)"]] = ruleset_energy_idle[["Energy Mean (MJ)", "Energy Std (MJ)"]].applymap(convert_to_mj)
+    return agg_df
 
-ruleset_energy_non_idle = df_non_idle.groupby("Ruleset")["PP0_ENERGY (J)"].agg(["mean", "std"]).reset_index()
-ruleset_energy_non_idle.columns = ["Ruleset", "Energy Mean (J)", "Energy Std (J)"]
+project_energy_idle = compute_aggregates(df_idle)
+project_energy_idle.iloc[:, 1:] = project_energy_idle.iloc[:, 1:].applymap(convert_to_mj)  # Convert to MJ
 
-# Plot functions
-def plot_energy(data, x_col, y_col, y_err, title, ylabel, filename):
-    plt.figure(figsize=(10, 6))
+project_energy_non_idle = compute_aggregates(df_non_idle)
 
-    # Calculate error bars
-    y_errors = data[y_err].values if len(data) > 1 else None  # Ensure yerr is None if only one data point
+# Plot function with centered error bars & positive Y filtering
+def plot_energy_p0_p1(data, x_col, y_col_p0, y_col_p1, y_err_p0, y_err_p1, title, ylabel, filename):
+    if data.empty:
+        print(f"Skipping {filename}: No positive Y values.")
+        return
 
-    # Create the bar plot
-    sns.barplot(data=data, x=x_col, y=y_col, capsize=0.2, width=0.4)
+    plt.figure(figsize=(12, 6))  # Increased figure width
 
-    # Add error bars
-    if y_errors is not None:
-        plt.errorbar(data[x_col], data[y_col], yerr=y_errors, fmt='none', capsize=5, color='black')
+    bar_width = 0.4
+    x_positions = np.arange(len(data))
+    x_positions_p0 = x_positions - bar_width / 2
+    x_positions_p1 = x_positions + bar_width / 2
 
-    # Calculate the limits for the y-axis to include the full range of mean ± std
-    min_y = max(0, data[y_col].min() - data[y_err].max())  # Ensure min_y is not below zero
-    max_y = data[y_col].max() + data[y_err].max()  # mean + std
+    bars_p0 = plt.bar(x_positions_p0, data[y_col_p0], yerr=data[y_err_p0], width=bar_width, capsize=5, label="PP0 Energy", color='blue', alpha=0.7)
+    bars_p1 = plt.bar(x_positions_p1, data[y_col_p1], yerr=data[y_err_p1], width=bar_width, capsize=5, label="PP1 Energy", color='red', alpha=0.7)
 
-    # Set y-axis limits
+    plt.xticks(x_positions, data[x_col], rotation=45, ha="right", fontsize=10)  # Rotate & align labels
+
+    plt.xlabel(x_col)
+    plt.ylabel(ylabel)
+    plt.title(title)
+    plt.legend()
+
+    min_y = max(0, min(data[y_col_p0].min() - data[y_err_p0].max(), data[y_col_p1].min() - data[y_err_p1].max()))
+    max_y = max(data[y_col_p0].max() + data[y_err_p0].max(), data[y_col_p1].max() + data[y_err_p1].max())
     plt.ylim(min_y, max_y)
 
-    # Add titles and labels
-    plt.title(title)
-    plt.ylabel(ylabel)
-    plt.xlabel(x_col)
+    plt.subplots_adjust(bottom=0.25)  # Add space for long labels
 
-    # Save the plot to a file
-    plt.xticks(rotation=45)  # Rotate x-axis labels for readability
-    plt.savefig(f'images/{filename}.png')
+    plt.savefig(f'images/{filename}.png', bbox_inches="tight")  # Ensure full labels
     plt.close()
 
 
-# Generate plots
-plot_energy(project_energy_idle, "Project", "Energy Mean (MJ)", "Energy Std (MJ)", "Average Energy Consumption per Project (PP0) Idle", "Energy (MJ)", "Energy_Consumption_By_Project_Idle")
-plot_energy(project_energy_non_idle, "Project", "Energy Mean (J)", "Energy Std (J)", "Average Energy Consumption per Project (PP0) Non Idle", "Energy (J)", "Energy_Consumption_By_Project_Non_Idle")
-plot_energy(ruleset_energy_idle, "Ruleset", "Energy Mean (MJ)", "Energy Std (MJ)", "Average Energy Consumption per Ruleset (PP0) Idle", "Energy (MJ)", "Energy_Consumption_By_Ruleset_Idle")
-plot_energy(ruleset_energy_non_idle, "Ruleset", "Energy Mean (J)", "Energy Std (J)", "Average Energy Consumption per Ruleset (PP0) Non Idle", "Energy (J)", "Energy_Consumption_By_Ruleset_Non_Idle")
+# Generate plots with centered error bars & positive Y filtering
+plot_energy_p0_p1(project_energy_idle, "Project", "PP0 Mean (J)", "PP1 Mean (J)", "PP0 Std (J)", "PP1 Std (J)",
+                   "Average Energy Consumption per Project (Idle)", "Energy (MJ)", "Energy_Consumption_By_Project_Idle")
+
+plot_energy_p0_p1(project_energy_non_idle, "Project", "PP0 Mean (J)", "PP1 Mean (J)", "PP0 Std (J)", "PP1 Std (J)",
+                   "Average Energy Consumption per Project (Non Idle)", "Energy (J)", "Energy_Consumption_By_Project_Non_Idle")
