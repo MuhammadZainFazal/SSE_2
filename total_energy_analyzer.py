@@ -397,19 +397,18 @@ def plot_dual_violin(df, x_col, y_col1, y_col2, title, ylabel, filename):
     }
     df_melted["Energy_Type"] = df_melted["Energy_Type"].map(energy_type_map)
 
-    # Create violin plot with adjustments for visibility
     sns.violinplot(
         x=x_col,
         y="Energy_Value",
         hue="Energy_Type",
         data=df_melted,
         split=True,
-        inner="box",  # Show box plot inside
-        palette={"PP0 Energy (J)": "#4c72b0", "Package Energy (J)": "#55a868"},  # Lighter colors
-        linewidth=1.2,  # Thicker outline for better visibility
-        alpha=0.5,  # Increase transparency for better contrast
-        width=0.8,  # Reduce width slightly to create spacing
-        dodge=True  # Ensure violins don’t fully overlap
+        inner="box",
+        palette={"PP0 Energy (J)": "#4c72b0", "Package Energy (J)": "#55a868"},
+        linewidth=1.2,
+        alpha=0.5,
+        width=0.8,
+        dodge=True
     )
 
     # Rotate x-axis labels for readability
