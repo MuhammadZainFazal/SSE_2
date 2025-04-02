@@ -9,7 +9,7 @@ from scenario.scenario import Scenario
 
 # Directories for Java files and rulesets
 project_dir = os.path.dirname(os.path.abspath(__file__))
-java_files_directory = [os.path.join(project_dir, 'java_files', 'junit5-r5.12.1')]
+java_files_directory = [os.path.join(project_dir, 'java_files', 'junit5-r5.12.1'), os.path.join(project_dir, 'java_files', 'Terasology-develop'), os.path.join(project_dir, 'java_files', 'jabref-main'), os.path.join(project_dir, 'java_files', 'spring-framework-main')]
 ruleset_paths = [os.path.join(project_dir, 'rulesets', 'category', 'java', f) for f in os.listdir(os.path.join(project_dir, 'rulesets', 'category', 'java')) if f.endswith('.xml')]
 #ruleset_paths = [os.path.join(project_dir, 'rulesets\\rulesets\\java\\quickstart.xml', )]
 
@@ -28,8 +28,8 @@ scenarios = [
     for rule in ruleset_paths
 ]
 
-runner = Runner(scenarios, number_of_runs=10)
-runner.run()
+# runner = Runner(scenarios, number_of_runs=10)
+# runner.run()
 
 for scenario in scenarios:
     analyzer = PowerAnalyzer(scenario.dataframe_file, scenario.name)

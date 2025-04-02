@@ -304,10 +304,10 @@ class PowerAnalyzer:
 
         self.plot_energy_by_run(data_without_idle_pp1, 'energy_by_run_without_idle_pp1', save=True, energy_col='PP1_ENERGY (J)')
         self.plot_average_energy_with_error(data_without_idle_pp1, 'average_energy_with_error_without_idle_pp1', save=True, energy_col='PP1_ENERGY (J)')
-
+        data_without_idle_package = self.generate_data_without_idle(energy_col='PACKAGE_ENERGY (J)')
         self.calculate_total_energy_consumption(data_without_idle_pp0, energy_col='PP0_ENERGY (J)', filename_suffix='_without_idle')
         self.calculate_total_energy_consumption(data_without_idle_pp1, energy_col='PP1_ENERGY (J)', filename_suffix='_without_idle')
-        self.calculate_total_energy_consumption(data_without_idle_pp1, energy_col='PACKAGE_ENERGY (J)', filename_suffix='_without_idle')
+        self.calculate_total_energy_consumption(data_without_idle_package, energy_col='PACKAGE_ENERGY (J)', filename_suffix='_without_idle')
 
         print(f"\nAnalysis complete. Reports and visualizations saved to {self.output_dir}/")
         return True
