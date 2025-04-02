@@ -234,23 +234,23 @@ plot_energy_p0_p1(ruleset_energy_non_idle, "Ruleset", "PP0 Mean (J)", "PP1 Mean 
                   "Energy_Consumption_By_Ruleset_Non_Idle")
 
 # Generate boxplots with outliers
-plot_boxplot(df_idle, "Project", "PP0_ENERGY (J)", "PP0 Energy Consumption by Project", "PP0 Energy (J)",
+plot_boxplot(df_non_idle, "Project", "PP0_ENERGY (J)", "PP0 Energy Consumption by Project", "PP0 Energy (J)",
              "Boxplot_PP0_By_Project")
-plot_boxplot(df_idle, "Project", "PP1_ENERGY (J)", "PP1 Energy Consumption by Project", "PP1 Energy (J)",
+plot_boxplot(df_non_idle, "Project", "PP1_ENERGY (J)", "PP1 Energy Consumption by Project", "PP1 Energy (J)",
              "Boxplot_PP1_By_Project")
-plot_boxplot(df_idle, "Ruleset", "PP0_ENERGY (J)", "PP0 Energy Consumption by Ruleset", "PP0 Energy (J)",
+plot_boxplot(df_non_idle, "Ruleset", "PP0_ENERGY (J)", "PP0 Energy Consumption by Ruleset", "PP0 Energy (J)",
              "Boxplot_PP0_By_Ruleset")
-plot_boxplot(df_idle, "Ruleset", "PP1_ENERGY (J)", "PP1 Energy Consumption by Ruleset", "PP1 Energy (J)",
+plot_boxplot(df_non_idle, "Ruleset", "PP1_ENERGY (J)", "PP1 Energy Consumption by Ruleset", "PP1 Energy (J)",
              "Boxplot_PP1_By_Ruleset")
 
 # Generate violin plots with outliers
-plot_violin(df_idle, "Project", "PP0_ENERGY (J)", "PP0 Energy Distribution by Project", "PP0 Energy (J)",
+plot_violin(df_non_idle, "Project", "PP0_ENERGY (J)", "PP0 Energy Distribution by Project", "PP0 Energy (J)",
             "Violin_PP0_By_Project")
-plot_violin(df_idle, "Project", "PP1_ENERGY (J)", "PP1 Energy Distribution by Project", "PP1 Energy (J)",
+plot_violin(df_non_idle, "Project", "PP1_ENERGY (J)", "PP1 Energy Distribution by Project", "PP1 Energy (J)",
             "Violin_PP1_By_Project")
-plot_violin(df_idle, "Ruleset", "PP0_ENERGY (J)", "PP0 Energy Distribution by Ruleset", "PP0 Energy (J)",
+plot_violin(df_non_idle, "Ruleset", "PP0_ENERGY (J)", "PP0 Energy Distribution by Ruleset", "PP0 Energy (J)",
             "Violin_PP0_By_Ruleset")
-plot_violin(df_idle, "Ruleset", "PP1_ENERGY (J)", "PP1 Energy Distribution by Ruleset", "PP1 Energy (J)",
+plot_violin(df_non_idle, "Ruleset", "PP1_ENERGY (J)", "PP1 Energy Distribution by Ruleset", "PP1 Energy (J)",
             "Violin_PP1_By_Ruleset")
 
 # Generate graphs for Projects without outliers
@@ -270,21 +270,21 @@ plot_energy_p0_p1(ruleset_energy_non_idle_no_outliers, "Ruleset", "PP0 Mean (J)"
                   "Energy_Consumption_By_Ruleset_Non_Idle_without_outliers")
 
 # Generate boxplots without outliers
-plot_boxplot(df_idle_no_outliers, "Project", "PP0_ENERGY (J)", "PP0 Energy Consumption by Project (Without Outliers)",
+plot_boxplot(df_non_idle_no_outliers, "Project", "PP0_ENERGY (J)", "PP0 Energy Consumption by Project (Without Outliers)",
              "PP0 Energy (J)", "Boxplot_PP0_By_Project_without_outliers")
-plot_boxplot(df_idle_no_outliers, "Project", "PP1_ENERGY (J)", "PP1 Energy Consumption by Project (Without Outliers)",
+plot_boxplot(df_non_idle_no_outliers, "Project", "PP1_ENERGY (J)", "PP1 Energy Consumption by Project (Without Outliers)",
              "PP1 Energy (J)", "Boxplot_PP1_By_Project_without_outliers")
-plot_boxplot(df_idle_no_outliers, "Ruleset", "PP0_ENERGY (J)", "PP0 Energy Consumption by Ruleset (Without Outliers)",
+plot_boxplot(df_non_idle_no_outliers, "Ruleset", "PP0_ENERGY (J)", "PP0 Energy Consumption by Ruleset (Without Outliers)",
              "PP0 Energy (J)", "Boxplot_PP0_By_Ruleset_without_outliers")
-plot_boxplot(df_idle_no_outliers, "Ruleset", "PP1_ENERGY (J)", "PP1 Energy Consumption by Ruleset (Without Outliers)",
+plot_boxplot(df_non_idle_no_outliers, "Ruleset", "PP1_ENERGY (J)", "PP1 Energy Consumption by Ruleset (Without Outliers)",
              "PP1 Energy (J)", "Boxplot_PP1_By_Ruleset_without_outliers")
 
 # Generate violin plots without outliers
-plot_violin(df_idle_no_outliers, "Project", "PP0_ENERGY (J)", "PP0 Energy Distribution by Project (Without Outliers)",
+plot_violin(df_non_idle_no_outliers, "Project", "PP0_ENERGY (J)", "PP0 Energy Distribution by Project (Without Outliers)",
             "PP0 Energy (J)", "Violin_PP0_By_Project_without_outliers")
-plot_violin(df_idle_no_outliers, "Project", "PP1_ENERGY (J)", "PP1 Energy Distribution by Project (Without Outliers)",
+plot_violin(df_non_idle_no_outliers, "Project", "PP1_ENERGY (J)", "PP1 Energy Distribution by Project (Without Outliers)",
             "PP1 Energy (J)", "Violin_PP1_By_Project_without_outliers")
-plot_violin(df_idle_no_outliers, "Ruleset", "PP0_ENERGY (J)", "PP0 Energy Distribution by Ruleset (Without Outliers)",
+plot_violin(df_non_idle_no_outliers, "Ruleset", "PP0_ENERGY (J)", "PP0 Energy Distribution by Ruleset (Without Outliers)",
             "PP0 Energy (J)", "Violin_PP0_By_Ruleset_without_outliers")
-plot_violin(df_idle_no_outliers, "Ruleset", "PP1_ENERGY (J)", "PP1 Energy Distribution by Ruleset (Without Outliers)",
+plot_violin(df_non_idle_no_outliers, "Ruleset", "PP1_ENERGY (J)", "PP1 Energy Distribution by Ruleset (Without Outliers)",
             "PP1 Energy (J)", "Violin_PP1_By_Ruleset_without_outliers")
