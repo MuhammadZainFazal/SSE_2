@@ -23,7 +23,7 @@ def parse_filename(filename):
 
 def remove_outliers(df, group_cols, value_cols):
     """
-    Remove min and max values for each group defined by multiple columns in the dataframe.
+    Remove the top 3 and bottom 3 values for each group defined by multiple columns in the dataframe.
 
     Parameters:
     df (DataFrame): Input dataframe
@@ -40,15 +40,17 @@ def remove_outliers(df, group_cols, value_cols):
         filtered_group = group_data.copy()
 
         for col in value_cols:
-            if not filtered_group.empty and len(filtered_group) > 2:  # Only remove if we have more than 2 values
-                min_idx = filtered_group[col].idxmin()
-                max_idx = filtered_group[col].idxmax()
-                # Remove both min and max
-                filtered_group = filtered_group.drop([min_idx, max_idx])
+            if len(filtered_group) > 6:  # Only remove if we have more than 6 values
+                # Get indices of the 3 smallest and 3 largest values
+                min_indices = filtered_group[col].nsmallest(3).index
+                max_indices = filtered_group[col].nlargest(3).index
+
+                # Remove the identified outliers
+                filtered_group = filtered_group.drop(index=min_indices.union(max_indices))
 
         result_df = pd.concat([result_df, filtered_group])
 
-    return result_df
+    return result_df.reset_index(drop=True)
 
 
 data = []
@@ -67,15 +69,15 @@ for file in os.listdir(directory):
             data.append(df)
 
 df_all = pd.concat(data, ignore_index=True)
-df_all["PP0_ENERGY (J)"] = df_all["PP0_ENERGY (J)"].fillna(0)
-df_all["PP1_ENERGY (J)"] = df_all["PP1_ENERGY (J)"].fillna(0)
-df_all["PACKAGE_ENERGY (J)"] = df_all["PACKAGE_ENERGY (J)"].fillna(0)  # Handle PACKAGE_ENERGY column
+df_all["PP0_ENERGY (J)"] = df_all["PP0_ENERGY (J)"]
+df_all["PP1_ENERGY (J)"] = df_all["PP1_ENERGY (J)"]
+df_all["PACKAGE_ENERGY (J)"] = df_all["PACKAGE_ENERGY (J)"]
 
 # Create a version without outliers, grouped by Project, Ruleset, and Idle Status
 df_all_no_outliers = remove_outliers(
     df_all,
     ["Project", "Ruleset", "Idle Status"],
-    ["PP0_ENERGY (J)", "PP1_ENERGY (J)", "PACKAGE_ENERGY (J)"]  # Include PACKAGE_ENERGY
+    ["PP0_ENERGY (J)", "PP1_ENERGY (J)", "PACKAGE_ENERGY (J)"]
 )
 
 # Separate data into non-idle only (original data)
@@ -363,14 +365,9 @@ plot_violin(df_non_idle_no_outliers, "Ruleset", "PACKAGE_ENERGY (J)",
             "PACKAGE Energy Distribution by Ruleset (Non Idle, Without Outliers)", "PACKAGE Energy (J)",
             "Violin_PACKAGE_By_Ruleset_Non_Idle_without_outliers")
 
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-
-def plot_dual_violin(df, x_col, y_col1, y_col2, title, y_label1, y_label2, filename):
+def plot_dual_violin(df, x_col, y_col1, y_col2, title, ylabel, filename):
     """
-    Plot two violin plots side by side with dual y-axes for different energy metrics.
+    Plot a split violin plot with two different energy metrics side by side.
 
     Parameters:
     df (DataFrame): Input dataframe with energy data
@@ -378,34 +375,58 @@ def plot_dual_violin(df, x_col, y_col1, y_col2, title, y_label1, y_label2, filen
     y_col1 (str): First energy metric column name (PP0 Energy in J)
     y_col2 (str): Second energy metric column name (Package Energy in J, converted to MJ)
     title (str): Plot title
-    y_label1 (str): Y-axis label for PP0 Energy
-    y_label2 (str): Y-axis label for Package Energy
+    ylabel (str): Y-axis label
     filename (str): Output filename without extension
     """
-    fig, ax1 = plt.subplots(figsize=(14, 8))
+    plt.figure(figsize=(14, 8))
     df = df.copy()
-    df[y_col2] = df[y_col2] / 1e6
 
-    ax2 = ax1.twinx()
-
-    sns.violinplot(
-        x=x_col, y=y_col1, data=df,
-        ax=ax1, color="blue", inner="quart", alpha=0.6
+    # Reshape data
+    df_melted = pd.melt(
+        df,
+        id_vars=[x_col],
+        value_vars=[y_col1, y_col2],
+        var_name="Energy_Type",
+        value_name="Energy_Value"
     )
 
+    # Rename for better legend readability
+    energy_type_map = {
+        y_col1: "PP0 Energy (J)",
+        y_col2: "Package Energy (J)"
+    }
+    df_melted["Energy_Type"] = df_melted["Energy_Type"].map(energy_type_map)
+
+    # Create violin plot with adjustments for visibility
     sns.violinplot(
-        x=x_col, y=y_col2, data=df,
-        ax=ax2, color="green", inner="quart", alpha=0.6
+        x=x_col,
+        y="Energy_Value",
+        hue="Energy_Type",
+        data=df_melted,
+        split=True,
+        inner="box",  # Show box plot inside
+        palette={"PP0 Energy (J)": "#4c72b0", "Package Energy (J)": "#55a868"},  # Lighter colors
+        linewidth=1.2,  # Thicker outline for better visibility
+        alpha=0.5,  # Increase transparency for better contrast
+        width=0.8,  # Reduce width slightly to create spacing
+        dodge=True  # Ensure violins don’t fully overlap
     )
-    ax1.set_xticklabels(ax1.get_xticklabels(), rotation=45, ha="right", fontsize=10)
 
-    ax1.set_ylabel(y_label1, fontsize=12, color="blue")
-    ax2.set_ylabel(y_label2, fontsize=12, color="green")
+    # Rotate x-axis labels for readability
+    plt.xticks(rotation=45, ha="right", fontsize=10)
 
+    # Labels and title
+    plt.xlabel(x_col, fontsize=12)
+    plt.ylabel(ylabel, fontsize=12)
     plt.title(title, fontsize=14)
 
+    # Improve legend readability
+    plt.legend(title="Energy Type", fontsize=10)
+
+    # Adjust layout
     plt.tight_layout()
 
+    # Save figure
     plt.savefig(f'images/{filename}.png', bbox_inches="tight")
     plt.close()
 
@@ -417,8 +438,7 @@ plot_dual_violin(
     "PP0_ENERGY (J)",
     "PACKAGE_ENERGY (J)",
     "PP0 vs Package Energy Distribution by Project (Non Idle)",
-    "PP0 Energy (J)",
-    "Package Energy (MJ)",
+    "Energy (J)",
     "Dual_Violin_PP0_Package_By_Project_Non_Idle"
 )
 
@@ -429,8 +449,7 @@ plot_dual_violin(
     "PP0_ENERGY (J)",
     "PACKAGE_ENERGY (J)",
     "PP0 vs Package Energy Distribution by Ruleset (Non Idle)",
-    "PP0 Energy (J)",
-    "Package Energy (MJ)",
+    "Energy (J)",
     "Dual_Violin_PP0_Package_By_Ruleset_Non_Idle"
 )
 
@@ -441,8 +460,7 @@ plot_dual_violin(
     "PP0_ENERGY (J)",
     "PACKAGE_ENERGY (J)",
     "PP0 vs Package Energy Distribution by Project (Non Idle, Without Outliers)",
-    "PP0 Energy (J)",
-    "Package Energy (MJ)",
+    "Energy (J)",
     "Dual_Violin_PP0_Package_By_Project_Non_Idle_without_outliers"
 )
 
@@ -453,7 +471,8 @@ plot_dual_violin(
     "PP0_ENERGY (J)",
     "PACKAGE_ENERGY (J)",
     "PP0 vs Package Energy Distribution by Ruleset (Non Idle, Without Outliers)",
-    "PP0 Energy (J)",
-    "Package Energy (MJ)",
+    "Energy (J)",
     "Dual_Violin_PP0_Package_By_Ruleset_Non_Idle_without_outliers"
 )
+
+df_non_idle_no_outliers.to_parquet("images/energy_data_no_outliers.parquet", index=False)
