@@ -15,7 +15,7 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
-
+energy_cols = ['PP0_ENERGY (J)', 'PACKAGE_ENERGY (J)']
 # Ensure images folder exists
 os.makedirs('images', exist_ok=True)
 logger.info("Created or verified 'images' directory")
@@ -280,6 +280,46 @@ try:
             except Exception as e:
                 logger.error(f"Error creating heatmap for {data_type}: {str(e)}")
             plt.close()
+
+            logger.info("Generating Average Energy Over Time by Project plot")
+
+            project_avg_energy = current_df.groupby(['Project', 'Time'])[energy_cols[1]].mean().reset_index()
+
+            # Plotting
+            plt.figure(figsize=(14, 8))
+            for project in project_avg_energy['Project'].unique():
+                project_data = project_avg_energy[project_avg_energy['Project'] == project]
+                plt.plot(project_data['Time'], project_data[energy_cols[1]], label=f"{project} {energy_cols[1]}")
+
+            plt.title('Average Energy Over Time by Project')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Average Energy (J)')
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig(f'images/Average_Energy_Over_Time_by_Project.png')
+            plt.close()
+            logger.info("Saved Average Energy Over Time by Project plot")
+
+
+            logger.info("Generating Average Energy Over Time by Ruleset plot")
+
+            # Group the data by Ruleset and Time, then calculate the mean of energy columns
+            ruleset_avg_energy = current_df.groupby(['Ruleset', 'Time'])[energy_cols[1]].mean().reset_index()
+
+            # Plotting
+            plt.figure(figsize=(14, 8))
+            for ruleset in ruleset_avg_energy['Ruleset'].unique():
+                ruleset_data = ruleset_avg_energy[ruleset_avg_energy['Ruleset'] == ruleset]
+                plt.plot(ruleset_data['Time'], ruleset_data[energy_cols[1]], label=f"{ruleset} {energy_cols[1]}")
+
+            plt.title('Average Energy Over Time by Ruleset')
+            plt.xlabel('Time (s)')
+            plt.ylabel('Average Energy (J)')
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig(f'images/Average_Energy_Over_Time_by_Ruleset.png')
+            plt.close()
+            logger.info("Saved Average Energy Over Time by Ruleset plot")
 
         logger.info("Analysis complete with outlier removal")
     else:
