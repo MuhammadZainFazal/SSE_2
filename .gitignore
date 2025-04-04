@@ -178,3 +178,5 @@ energy_analysis_output
 energibridge_output
 images
 java_files
+pmd_reports
+pm_error_plots
