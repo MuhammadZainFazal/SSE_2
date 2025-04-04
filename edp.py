@@ -175,7 +175,7 @@ try:
 
         # Process both datasets in parallel
         datasets = {
-            'no_idle_no_outliers': df_no_outliers,
+            'no_outliers': df_no_outliers,
         }
 
         for data_type, current_df in datasets.items():
