@@ -85,7 +85,6 @@ def generate_data_without_idle(df, energy_cols=['PP0_ENERGY (J)', 'PACKAGE_ENERG
         logger.warning(f"None of the specified energy columns {energy_cols} exist in dataset.")
         return adjusted_data
 
-    # For each file (run), calculate and subtract the idle energy
     for file in adjusted_data['File'].unique():
         # Create a mask for the current run
         run_mask = adjusted_data['File'] == file
@@ -297,8 +296,10 @@ try:
 
             logger.info("Generating Average Energy Over Time by Ruleset plot")
 
+            current_df.to_parquet('energibridge_output/current_df.parquet', index=False)
             # Group the data by Ruleset and Time, then calculate the mean of energy columns
             ruleset_avg_energy = current_df.groupby(['Ruleset', 'Time'])[energy_cols[1]].mean().reset_index()
+            ruleset_avg_energy.to_parquet('energibridge_output/ruleset_avg_energy.parquet', index=False)
 
             # Plotting
             plt.figure(figsize=(14, 8))
