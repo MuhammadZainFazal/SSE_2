@@ -28,8 +28,8 @@ scenarios = [
     for rule in ruleset_paths
 ]
 
-# runner = Runner(scenarios, number_of_runs=10)
-# runner.run()
+runner = Runner(scenarios, number_of_runs=30)
+runner.run()
 
 for scenario in scenarios:
     analyzer = PowerAnalyzer(scenario.dataframe_file, scenario.name)

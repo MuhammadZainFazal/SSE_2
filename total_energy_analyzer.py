@@ -40,7 +40,7 @@ def remove_outliers(df, group_cols, value_cols):
         filtered_group = group_data.copy()
 
         for col in value_cols:
-            if len(filtered_group) > 6:  # Only remove if we have more than 6 values
+            if len(filtered_group) > 6:
                 # Get indices of the 3 smallest and 3 largest values
                 min_indices = filtered_group[col].nsmallest(3).index
                 max_indices = filtered_group[col].nlargest(3).index
@@ -390,7 +390,6 @@ def plot_dual_violin(df, x_col, y_col1, y_col2, title, ylabel, filename):
         value_name="Energy_Value"
     )
 
-    # Rename for better legend readability
     energy_type_map = {
         y_col1: "PP0 Energy (J)",
         y_col2: "Package Energy (J)"
@@ -411,18 +410,11 @@ def plot_dual_violin(df, x_col, y_col1, y_col2, title, ylabel, filename):
         dodge=True
     )
 
-    # Rotate x-axis labels for readability
     plt.xticks(rotation=45, ha="right", fontsize=10)
-
-    # Labels and title
     plt.xlabel(x_col, fontsize=12)
     plt.ylabel(ylabel, fontsize=12)
     plt.title(title, fontsize=14)
-
-    # Improve legend readability
     plt.legend(title="Energy Type", fontsize=10)
-
-    # Adjust layout
     plt.tight_layout()
 
     # Save figure

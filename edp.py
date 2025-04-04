@@ -5,7 +5,6 @@ import os
 import re
 import logging
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -78,7 +77,6 @@ def generate_data_without_idle(df, energy_cols=['PP0_ENERGY (J)', 'PACKAGE_ENERG
     """
     logger.info(f"Generating data with idle energy subtracted using {idle_seconds}s baseline")
 
-    # Create a copy of the original data
     adjusted_data = df.copy()
 
     # Make sure all energy columns exist
@@ -95,7 +93,6 @@ def generate_data_without_idle(df, energy_cols=['PP0_ENERGY (J)', 'PACKAGE_ENERG
 
         # Only process runs that have data
         if len(run_data) > 0:
-            # Get data from the first idle_seconds seconds of the run
             idle_data = run_data[run_data['Time'] <= idle_seconds]
 
             if len(idle_data) > 0:
@@ -162,9 +159,6 @@ try:
     if all_data:
         logger.info("Combining data from all files")
         df_no_outliers = pd.concat(all_data, ignore_index=True)
-
-        # Remove outliers based on execution time
-        logger.info("Removing outliers based on execution time")
 
         logger.info(f"Columns in dataset: {df_no_outliers.columns.tolist()}")
         logger.info("Calculating additional metrics")
